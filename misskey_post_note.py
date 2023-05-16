@@ -7,8 +7,9 @@ class PostNote():
         self.misskey_api = mk(misskey_instance)
         self.misskey_api.token = misskey_api_token
         
-    def post(self,shop_name,product_name,url):
-        self.misskey_api.notes_create(text=f"【{shop_name}】 {product_name}\n{url}")
+    def post(self,post_schedule):
+        for data in post_schedule.values():
+            self.misskey_api.notes_create(text=f"{data[1]} - {data[0]}\n{data[2]}")
         
 if __name__ == "__main__":
     pn = PostNote()

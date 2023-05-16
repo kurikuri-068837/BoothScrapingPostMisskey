@@ -2,7 +2,8 @@ import time
 import tkinter as tk
 import json
 import threading
-
+from scraping import Scraping
+from misskey_post_note import PostNote
 
 def start_processing():
     global is_processing, start_button_state, pause_button_state, resume_button_state, stop_button_state
@@ -23,6 +24,7 @@ def start_processing():
         resume_button.config(state=tk.DISABLED)
         stop_button.config(state=tk.NORMAL)
         exit_button.config(state=tk.DISABLED)
+
 
 def pause_processing():
     global pause_button_state, resume_button_state
@@ -91,6 +93,7 @@ def log_entry(entry):
     log.see(tk.END)
 
 def save_data():
+    id_list_before = sp.get_processed_item_list()
     data = {"id_list_before": id_list_before}
     with open("data.json", "w") as file:
         json.dump(data, file)
@@ -105,13 +108,16 @@ def load_data():
         id_list_before = []
 
 def process():
-    global id_list_before
+    global sp, pn
     while is_processing:
         
-        # ここに処理を記述する
-        id_list_before.append(1)
+        # ここに処理を記述する #
         
-        time.sleep(1)
+        scheduled_posts_dict = sp.process()
+        pn.post(scheduled_posts_dict)
+        ###################### 
+        
+        time.sleep(0.2)
 
 def update_gui():
     global update_status
@@ -153,13 +159,8 @@ log.pack()
 is_processing = False
 id_list_before = []
 load_data()
-
-
-# 初期化とデータの読み込み
-is_processing = False
-id_list_before = []
-update_status = True
-load_data()
+sp = Scraping(id_list_before)
+pn = PostNote()
 
 # メインスレッドの開始
 gui_thread = threading.Thread(target=update_gui)
