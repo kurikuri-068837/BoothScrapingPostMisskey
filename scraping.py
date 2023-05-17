@@ -8,7 +8,7 @@ class Scraping():
         self.id_list_before = id_list_before
         self.id_list_after = []
         self.item_dict_mem = {}
-        self.NextPageFrag = False
+        self.NotReadNextPageFrag = False
         self.scheduled_posts = {}
         
         
@@ -22,7 +22,7 @@ class Scraping():
         time.sleep(3)
         self.page_no = str(page_no)
         r = rq.get(f"https://booth.pm/ja/search/VRChat?page={self.page_no}&sort=new")
-        print(r.status_code)
+        self.now_url_and_status_code = f"status:{r.status_code}  https://booth.pm/ja/search/VRChat?page={self.page_no}&sort=new"
         soup = bs(r.content, "html.parser")
         item_id = soup.select('.item-card__wrap')
         shop_name = soup.select(".item-card__shop-name")
@@ -34,25 +34,26 @@ class Scraping():
     def process(self):
         page_count = 1
         
-        while not self.NextPageFrag:
+        while not self.NotReadNextPageFrag:
             
             item_id,shop_name,item_name,item_url = self.get_info(page_no=page_count)
-            
             for i in range(60):
-                print(item_id[i].get('id'))
-                
                 if not item_id[i].get('id') in self.id_list_before: # 過去に投稿したものと重複するかの確認
-                    print("a")
                     item_dict = {item_id[i]:[shop_name[i],item_name[i],item_url[i]]}
                     self.scheduled_posts = self.scheduled_posts | item_dict # 辞書の結合
-                    self.add_processed_item_list(item=item_id)
+                    self.add_processed_item_list(item=item_id[i])
                     
                 else:
-                    self.NextPageFrag = True
+                    self.NotReadNextPageFrag = True
+                    break
             if page_count == 4 : break # 3ページ目よりも後ろは見ないようにする（負荷軽減と万が一の時の保険）
-            time.sleep(2)
+            time.sleep(1)
             page_count+=1
             
+            
+    def watch_now_processing_url(self):
+        return self.now_url_and_status_code
+    
     def get_processed_item_list(self):
         return self.id_list_before
         
