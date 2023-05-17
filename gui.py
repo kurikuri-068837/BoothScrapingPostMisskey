@@ -1,6 +1,6 @@
 import time
 import tkinter as tk
-import json
+import pickle
 import threading
 from scraping import Scraping
 from misskey_post_note import PostNote
@@ -94,16 +94,14 @@ def log_entry(entry):
 
 def save_data():
     id_list_before = sp.get_processed_item_list()
-    data = {"id_list_before": id_list_before}
-    with open("data.json", "w") as file:
-        json.dump(data, file)
+    with open("id_list_before.txt", "w") as f:
+        pickle.dump(id_list_before, f)
 
 def load_data():
     global id_list_before
     try:
-        with open("data.json", "r") as file:
-            data = json.load(file)
-            id_list_before = data.get("id_list_before", [])
+        with open("id_list_before.txt", "rb") as f:
+            id_list_before = pickle.load(f)
     except FileNotFoundError:
         id_list_before = []
 
@@ -114,10 +112,11 @@ def process():
         # ここに処理を記述する #
         
         scheduled_posts_dict = sp.process()
-        pn.post(scheduled_posts_dict)
+        #pn.post(scheduled_posts_dict)
         ###################### 
         
-        time.sleep(0.2)
+        time.sleep(20)
+        
 
 def update_gui():
     global update_status

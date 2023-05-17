@@ -50,6 +50,7 @@ class Scraping():
                 else:
                     self.NextPageFrag = True
             if page_count == 4 : break # 3ページ目よりも後ろは見ないようにする（負荷軽減と万が一の時の保険）
+            time.sleep(5)
             page_count+=1
             
     def get_processed_item_list(self):
