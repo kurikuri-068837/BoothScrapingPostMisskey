@@ -9,14 +9,14 @@ def start_processing():
     global is_processing, start_button_state, pause_button_state, resume_button_state, stop_button_state
     if not start_button_state and not is_processing:
         is_processing = True
-        start_button_state = True
-        pause_button_state = True
+        start_button_state  = True
+        pause_button_state  = True
         resume_button_state = False
-        stop_button_state = False
+        stop_button_state   = False
         
         log_entry("status:start")
         # 処理スレッドの開始
-        processing_thread = threading.Thread(target=process)
+        processing_thread = threading.Thread(target=running_process)
         processing_thread.start()
         # ボタンの状態を更新
         start_button.config(state=tk.DISABLED)
@@ -105,17 +105,23 @@ def load_data():
     except FileNotFoundError:
         id_list_before = []
 
-def process():
+def scraping_and_post():
+    global sp, pn
+    scheduled_posts_dict = sp.process()
+    #pn.post(scheduled_posts_dict)
+
+def running_process():
     global sp, pn
     while is_processing:
         
         # ここに処理を記述する #
         
-        scheduled_posts_dict = sp.process()
-        #pn.post(scheduled_posts_dict)
-        ###################### 
+        sap = threading.Thread(target=scraping_and_post)
+        sap.start()
+        time.sleep(60)
+        sap.join()
         
-        time.sleep(20)
+        ###################### 
         
 
 def update_gui():
