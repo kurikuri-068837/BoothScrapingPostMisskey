@@ -2,3 +2,5 @@ apikey.py
 data.json
 .vscode/
 **.pyc
+**.csv
+**.txt
