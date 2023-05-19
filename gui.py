@@ -9,7 +9,8 @@ from misskey_post_note import PostNote
 class AppGUI():
     def __init__(self,controller):
         # GUIの作成
-        self.window = tk.Tk()
+        window = tk.Tk()
+        self.window = window
         self.window.title("Processing Program")
 
         # ボタンとテキストボックスの配置
@@ -54,11 +55,8 @@ class AppGUI():
         
         
         self.controller = controller
-        
         self.window.mainloop()
         
-        
-    
     def start_processing(self):
         if not self.start_button_state and not self.is_processing and not self.ProcessStopFrag:
             self.is_processing = True
