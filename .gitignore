@@ -3,4 +3,5 @@ data.json
 .vscode/
 **.pyc
 **.csv
+!processed_id_list.csv
 **.txt
