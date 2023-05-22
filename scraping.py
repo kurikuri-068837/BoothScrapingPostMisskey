@@ -1,6 +1,10 @@
 import requests as rq
 from bs4 import BeautifulSoup as bs
 import time
+import pandas as pd
+import threading
+
+from misskey_post_note import PostNote
 
 
 class Scraping():
@@ -8,14 +12,16 @@ class Scraping():
         self.processed_id_list = processed_id_list
         self.item_dict_mem = {}
         self.NotReadNextPageFrag = False
-        self.scheduled_posts = {}
         self.page_no = 1
+        self.updatecsv = threading.Thread(target=self.update_save_data)
         
         
-    def add_processed_item_list(self,item):
-        self.processed_id_list.insert(0,item)  # 要素をリストに追加
-        if len(self.processed_id_list) > 270:
-            self.processed_id_list.pop()
+    def add_processed_item_list(self,target_list,item):
+        target_list.insert(0,item)  # 要素をリストに追加
+        if len(target_list) > 270:
+            target_list.pop()
+            
+        return target_list
     
     
     def get_info(self):
@@ -31,7 +37,7 @@ class Scraping():
         return item_id,shop_name,item_name,item_url
         
     def process(self):
-        
+        self.scheduled_posts = {}
         while not self.NotReadNextPageFrag:
             
             item_id,shop_name,item_name,item_url = self.get_info()
@@ -40,16 +46,26 @@ class Scraping():
                 if not item_id[i].get('id') in self.processed_id_list: # 過去に投稿したものと重複するかの確認
                     item_dict = {item_id[i].get('id'):[shop_name[i].get_text(),item_name[i].find('a').text,item_url[i].get('href')]}
                     self.scheduled_posts = self.scheduled_posts | item_dict # 辞書の結合
-                    self.add_processed_item_list(item=item_id[i].get('id'))
+                    self.processed_id_list = self.add_processed_item_list(target_list=self.processed_id_list,item=item_id[i].get('id'))
                     
+                elif self.page_no == 1:
+                    print("nothing post target")
+                    self.NotReadNextPageFrag = True
+                    break
                 else:
                     self.NotReadNextPageFrag = True
                     break
             if self.page_no == 4 : break # 3ページ目よりも後ろは見ないようにする（負荷軽減と万が一の時の保険）
             print("TEST")
+            
+            self.updatecsv.start()
+            
             time.sleep(3)
             
+            self.updatecsv.join()
+            print("save ok")
             self.page_no+=1
+            
         return self.scheduled_posts
             
             
@@ -58,11 +74,30 @@ class Scraping():
     
     def get_processed_id_list(self):
         return self.processed_id_list
+    
+    def update_save_data(self):
+        processed_id_list = self.processed_id_list
+        processed_id_list_df = pd.DataFrame(processed_id_list)
+        processed_id_list_df.to_csv("processed_id_list.csv",index=False)
+        
         
         
 if __name__ == "__main__":
-    sp = Scraping(processed_id_list=[])
-    sp.process()
+    processed_id_list = list(pd.read_csv("processed_id_list.csv").values[:,0])
+        
+    sp = Scraping(processed_id_list)
+    pn = PostNote()
+    while True:
+        print("enter")
+        scheduled_posts = sp.process()
+        
+        
+        if scheduled_posts != {}:
+            print("post process")
+            postnote_thread = threading.Thread(target=pn.post,args=(scheduled_posts,))
+            postnote_thread.start()
+            print("post end")
+        time.sleep(120)
 
 
 
