@@ -17,10 +17,12 @@ class Scraping():
         
         
     def add_processed_item_list(self,target_list,item):
+
+        print(type(target_list))
         target_list.insert(0,item)  # 要素をリストに追加
+        
         if len(target_list) > 270:
             target_list.pop()
-            
         return target_list
     
     
@@ -37,18 +39,23 @@ class Scraping():
         return item_id,shop_name,item_name,item_url
         
     def process(self):
+        self.NotReadNextPageFrag = False
+        self.page_no = 1
         self.scheduled_posts = {}
         while not self.NotReadNextPageFrag:
             
             item_id,shop_name,item_name,item_url = self.get_info()
-            print(shop_name[0].get_text(),item_name[0].find('a').text,item_url[0].get('href'))
+            
             for i in range(60):
+                print(item_id[i].get('id'))
                 if not item_id[i].get('id') in self.processed_id_list: # 過去に投稿したものと重複するかの確認
                     item_dict = {item_id[i].get('id'):[shop_name[i].get_text(),item_name[i].find('a').text,item_url[i].get('href')]}
                     self.scheduled_posts = self.scheduled_posts | item_dict # 辞書の結合
+                    
                     self.processed_id_list = self.add_processed_item_list(target_list=self.processed_id_list,item=item_id[i].get('id'))
                     
-                elif self.page_no == 1:
+                    
+                elif item_id[i].get('id') in self.processed_id_list and self.page_no == 1 and i == 0:
                     print("nothing post target")
                     self.NotReadNextPageFrag = True
                     break
@@ -56,16 +63,18 @@ class Scraping():
                     self.NotReadNextPageFrag = True
                     break
             if self.page_no == 4 : break # 3ページ目よりも後ろは見ないようにする（負荷軽減と万が一の時の保険）
-            print("TEST")
             
-            self.updatecsv.start()
+            
+            
+            
             
             time.sleep(3)
-            
-            self.updatecsv.join()
-            print("save ok")
             self.page_no+=1
-            
+        self.update_save_data()
+        time.sleep(10)
+        
+        print("save ok")
+
         return self.scheduled_posts
             
             
@@ -83,21 +92,31 @@ class Scraping():
         
         
 if __name__ == "__main__":
-    processed_id_list = list(pd.read_csv("processed_id_list.csv").values[:,0])
-        
+    df = pd.read_csv("processed_id_list.csv")
+    processed_id_list = list(df.values[:,0])
+    
+    def check_process_time():
+        current_time = time.localtime()
+        hour = current_time.tm_hour
+
+        if 1 <= hour < 6:
+            print("夜間のため、プロセスを実行しません")
+            return False
+        return True
+    
     sp = Scraping(processed_id_list)
     pn = PostNote()
     while True:
-        print("enter")
-        scheduled_posts = sp.process()
-        
-        
-        if scheduled_posts != {}:
-            print("post process")
-            postnote_thread = threading.Thread(target=pn.post,args=(scheduled_posts,))
-            postnote_thread.start()
-            print("post end")
-        time.sleep(120)
+        if check_process_time():
+            print("enter")
+            scheduled_posts = sp.process()
+            
+            if scheduled_posts != {}:
+                print("post process")
+                postnote_thread = threading.Thread(target=pn.post,args=(scheduled_posts,))
+                postnote_thread.start()
+                print("post end")
+        time.sleep(600)
 
 
 
