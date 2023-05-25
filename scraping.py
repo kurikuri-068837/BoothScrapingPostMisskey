@@ -17,7 +17,6 @@ class Scraping():
         
         
     def add_processed_item_list(self,target_list,item):
-
         print(type(target_list))
         target_list.insert(0,item)  # 要素をリストに追加
         
@@ -74,7 +73,6 @@ class Scraping():
         time.sleep(10)
         
         print("save ok")
-
         return self.scheduled_posts
             
             
@@ -98,9 +96,14 @@ if __name__ == "__main__":
     def check_process_time():
         current_time = time.localtime()
         hour = current_time.tm_hour
+        minute = current_time.tm_min
 
-        if 1 <= hour < 6:
-            print("夜間のため、プロセスを実行しません")
+        if 23 <= hour or 0 <= hour < 6 or (hour == 6 and minute <= 30 ):
+            
+            print("夜間のため、プロセスを実行しません(停止時間:23時~6時半まで)")
+            if hour == 23:
+                wait_sec = 7*3600
+                time.sleep(wait_sec)
             return False
         return True
     

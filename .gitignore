@@ -5,3 +5,4 @@ data.json
 **.csv
 !processed_id_list.csv
 **.txt
+**.log

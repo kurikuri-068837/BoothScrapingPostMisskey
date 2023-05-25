@@ -4,23 +4,22 @@ import threading
 #from gui import AppGUI
 import time
 import pandas as pd
+import logging
 
 class AppController():
     
     def __init__(self) -> None:
         #self.mainloop = threading.Thread(target=lambda : AppGUI(self),)
         #self.mainloop.start()
-        self.load_data()
         self.ProcessingFrag = False
         self.StopProcessFrag = False
-        self.cycle_time = 60
-        self.sp = Scraping(self.processed_id_list)
-        self.scraping_thread = threading.Thread(target=self.sp.process)
-        self.pn = PostNote()
-        self.postnote_thread = threading.Thread(target=self.pn.post)
+        self.cycle_time = 600
+        
+        
         
         
     def start_processing(self):
+        self.load_data()
         self.ProcessingFrag = True
         self.StopProcessFrag = False
         #TODO:ここにスクレイピング等の処理
@@ -67,6 +66,7 @@ class AppController():
                 
         except:
             self.processed_id_list = []
+        logging.log
             
     def save_data(self):
         processed_id_list = self.sp.get_processed_id_list()
@@ -74,18 +74,41 @@ class AppController():
         processed_id_list_df.to_csv("processed_id_list.csv",index=False)
         
     def scraping_process(self):
+        sp = Scraping(self.processed_id_list)
+        pn = PostNote()
         while self.ProcessingFrag:
-            self.scraping_thread.start()
+            if self.check_process_time():
+                print("enter")
+                scheduled_posts = sp.process()
+                
+                if scheduled_posts != {}:
+                    print("post process")
+                    postnote_thread = threading.Thread(target=pn.post,args=(scheduled_posts,))
+                    postnote_thread.start()
+                    print("post end")
             
             (f"PF:{self.ProcessingFrag},SPF:{self.StopProcessFrag}")
-            time.sleep(self.cycle_time)
-            
-            scheduled_posts = self.scraping_thread.join()
             print(f"scheduled_posts:{scheduled_posts}")
+            
+            if self.judge_weekday_daytime(): # 日中の昼間だった場合は実行スパンを30分おきにする
+                time.sleep(self.cycle_time*3)
+            else:
+                time.sleep(self.cycle_time)
             
         self.StopProcessFrag = True
         
-        
+    def judge_weekday_daytime(self):
+        current_time = time.localtime()
+        day_of_week = current_time.tm_wday  # 0: 月曜日, 1: 火曜日, ... , 6: 日曜日
+        hour = current_time.tm_hour
+        minute = current_time.tm_min
+
+        if 0 <= day_of_week <= 4:
+            # 月曜日から金曜日までの場合
+            if (9 <= hour < 11) or (13 <= hour < 17) or (hour == 11 and minute <= 20 ):
+                # 9時から12時、13時から17時までの間は日中のスパンを延長する
+                return True
+        return False
         
         
     def CUI_Controller(self):
@@ -104,3 +127,20 @@ class AppController():
         input("プログラムを終了します。(please Enter)")
 
 
+    def check_process_time(self):
+        current_time = time.localtime()
+        hour = current_time.tm_hour
+        minute = current_time.tm_min
+        
+        if 23 <= hour or 0 <= hour < 6 or (hour == 6 and minute <= 30 ):
+            
+            print("夜間のため、プロセスを実行しません(停止時間:23時~6時半まで)")
+            if hour == 23:
+                wait_sec = 7*3600
+                time.sleep(wait_sec)
+            return False
+        return True
+
+    
+    
+    

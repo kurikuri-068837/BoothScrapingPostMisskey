@@ -9,7 +9,7 @@ class PostNote():
         
     def post(self,post_schedule):
         for data in post_schedule.values():
-            time.sleep(5)
+            time.sleep(30)
             self.misskey_api.notes_create(text=f"{data[1]} - {data[0]}\n{data[2]}")
         
 if __name__ == "__main__":
