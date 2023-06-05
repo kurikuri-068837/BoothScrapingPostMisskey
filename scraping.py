@@ -3,17 +3,18 @@ from bs4 import BeautifulSoup as bs
 import time
 import pandas as pd
 import threading
-
 from misskey_post_note import PostNote
-
+import logging
 
 class Scraping():
     def __init__(self,processed_id_list:list):
+        self.logger = logging.getLogger("BSMPPLog.controller").getChild("model_scraping")
         self.processed_id_list = processed_id_list
         self.item_dict_mem = {}
         self.NotReadNextPageFrag = False
         self.page_no = 1
         self.updatecsv = threading.Thread(target=self.update_save_data)
+        
         
         
     def add_processed_item_list(self,target_list,item):
@@ -27,10 +28,13 @@ class Scraping():
     
     def get_info(self):
         time.sleep(3)
-        r = rq.get(f"https://booth.pm/ja/search/VRChat?page={self.page_no}&sort=new")
-        print(f"https://booth.pm/ja/search/VRChat?page={self.page_no}&sort=new")
-        self.now_url_and_status_code = f"status:{r.status_code}  https://booth.pm/ja/search/VRChat?page={self.page_no}&sort=new"
+        cookie = {'adult': 't'}
+        r = rq.get(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat", cookies=cookie)
+        print(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat")
+        self.now_url_and_status_code = f"status:{r.status_code}  https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat"
+        self.logger.debug(f"{self.now_url_and_status_code}")
         soup = bs(r.content, "html.parser")
+
         item_id = soup.select('.item-card__wrap')
         shop_name = soup.select(".item-card__shop-name")
         item_name = soup.select(".item-card__title")
@@ -44,18 +48,18 @@ class Scraping():
         while not self.NotReadNextPageFrag:
             
             item_id,shop_name,item_name,item_url = self.get_info()
-            
+            print(item_id)
             for i in range(60):
                 print(item_id[i].get('id'))
                 if not item_id[i].get('id') in self.processed_id_list: # 過去に投稿したものと重複するかの確認
                     item_dict = {item_id[i].get('id'):[shop_name[i].get_text(),item_name[i].find('a').text,item_url[i].get('href')]}
-                    self.scheduled_posts = self.scheduled_posts | item_dict # 辞書の結合
+                    self.scheduled_posts = item_dict | self.scheduled_posts  # 辞書の結合
                     
                     self.processed_id_list = self.add_processed_item_list(target_list=self.processed_id_list,item=item_id[i].get('id'))
                     
                     
                 elif item_id[i].get('id') in self.processed_id_list and self.page_no == 1 and i == 0:
-                    print("nothing post target")
+                    self.logger.info('NothingPostTarget')
                     self.NotReadNextPageFrag = True
                     break
                 else:

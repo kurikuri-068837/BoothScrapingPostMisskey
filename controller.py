@@ -1,19 +1,19 @@
 from scraping import Scraping
 from misskey_post_note import PostNote
 import threading
-#from gui import AppGUI
 import time
 import pandas as pd
 import logging
+from secure import *
 
 class AppController():
     
     def __init__(self) -> None:
-        #self.mainloop = threading.Thread(target=lambda : AppGUI(self),)
-        #self.mainloop.start()
+        self.logger = logging.getLogger("BSMPPLog").getChild("controller")
         self.ProcessingFrag = False
-        self.StopProcessFrag = False
+        self.StoppableFrag = False
         self.cycle_time = 600
+        
         
         
         
@@ -21,7 +21,7 @@ class AppController():
     def start_processing(self):
         self.load_data()
         self.ProcessingFrag = True
-        self.StopProcessFrag = False
+        self.StoppableFrag = False
         #TODO:ここにスクレイピング等の処理
         other_process_thread = threading.Thread(target=self.scraping_process)
         other_process_thread.start()
@@ -34,7 +34,7 @@ class AppController():
         self.ProcessingFrag = False
         timer_start = time.time()
         print("prease wait...")
-        while self.StopProcessFrag:
+        while not self.StoppableFrag:
             time.sleep(2)
             print(time.time()-timer_start)
         #TODO:スクレイピング、misskeyのポスト終了処理、処理済みリストの保存処理
@@ -49,7 +49,7 @@ class AppController():
     
     def resume_processing(self,):
         self.ProcessingFrag = True
-        self.StopProcessFrag = False
+        self.StoppableFrag = False
         self.scraping_process()
         pass
     
@@ -74,12 +74,13 @@ class AppController():
         processed_id_list_df.to_csv("processed_id_list.csv",index=False)
         
     def scraping_process(self):
-        sp = Scraping(self.processed_id_list)
+        self.sp = Scraping(self.processed_id_list)
         pn = PostNote()
         while self.ProcessingFrag:
+            self.StoppableFrag = False
             if self.check_process_time():
                 print("enter")
-                scheduled_posts = sp.process()
+                scheduled_posts = self.sp.process()
                 
                 if scheduled_posts != {}:
                     print("post process")
@@ -87,15 +88,19 @@ class AppController():
                     postnote_thread.start()
                     print("post end")
             
-            (f"PF:{self.ProcessingFrag},SPF:{self.StopProcessFrag}")
-            print(f"scheduled_posts:{scheduled_posts}")
             
-            if self.judge_weekday_daytime(): # 日中の昼間だった場合は実行スパンを30分おきにする
-                time.sleep(self.cycle_time*3)
-            else:
-                time.sleep(self.cycle_time)
+            self.StoppableFrag = True
             
-        self.StopProcessFrag = True
+            for i in range(self.cycle_time):
+                if self.judge_weekday_daytime(): # 日中の昼間だった場合は実行スパンを30分おきにする
+                    time.sleep(1*3)
+                else:
+                    time.sleep(1)
+                if not self.ProcessingFrag:
+                    postnote_thread.join()
+                    print("a")
+            postnote_thread.join()
+        
         
     def judge_weekday_daytime(self):
         current_time = time.localtime()
@@ -115,6 +120,7 @@ class AppController():
         while True:
             command = input("process - start/stop: ")
             if command == "stop":
+                self.ProcessingFrag = False
                 self.stop_processing()
                 break
             # 特定のコマンドに対する処理を記述する
