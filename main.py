@@ -29,6 +29,6 @@ if __name__ == "__main__":
     logger = setting_log()
     logger.debug("StartProcess")
     app = AppController()
-    app.CUI_Controller()
+    app.start_processing()
 
 

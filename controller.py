@@ -4,7 +4,8 @@ import threading
 import time
 import pandas as pd
 import logging
-from secure import *
+#from secure import * #GCP以降に伴い使用中止
+import sys
 
 class AppController():
     
@@ -107,7 +108,7 @@ class AppController():
         day_of_week = current_time.tm_wday  # 0: 月曜日, 1: 火曜日, ... , 6: 日曜日
         hour = current_time.tm_hour
         minute = current_time.tm_min
-
+        
         if 0 <= day_of_week <= 4:
             # 月曜日から金曜日までの場合
             if (9 <= hour < 11) or (13 <= hour < 17) or (hour == 11 and minute <= 20 ):
@@ -115,7 +116,7 @@ class AppController():
                 return True
         return False
         
-        
+    # GCP移行に伴い使用中止
     def CUI_Controller(self):
         while True:
             command = input("process - start/stop: ")
@@ -138,13 +139,11 @@ class AppController():
         hour = current_time.tm_hour
         minute = current_time.tm_min
         
-        if 23 <= hour or 0 <= hour < 6 or (hour == 6 and minute <= 30 ):
+        if 23 <= hour or 0 <= hour < 6 or (hour == 6 and minute <= 30 ) or (hour==22 and minute >=30):
             
-            print("夜間のため、プロセスを実行しません(停止時間:23時~6時半まで)")
-            if hour == 23:
-                wait_sec = 7*3600
-                time.sleep(wait_sec)
-            return False
+            print("夜間のため、プロセスを実行しません(停止時間:22時半~6時半まで)")
+            self.save_data()
+            sys.exit()
         return True
 
     
