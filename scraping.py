@@ -18,7 +18,7 @@ class Scraping():
         
         
     def add_processed_item_list(self,target_list,item):
-        print(type(target_list))
+        #print(type(target_list))
         target_list.insert(0,item)  # 要素をリストに追加
         
         if len(target_list) > 270:
@@ -48,10 +48,11 @@ class Scraping():
         while not self.NotReadNextPageFrag:
             
             item_id,shop_name,item_name,item_url = self.get_info()
-            print(item_id)
+            #print(item_id)
             for i in range(60):
-                print(item_id[i].get('id'))
+                #print(item_id[i].get('id'))
                 if not item_id[i].get('id') in self.processed_id_list: # 過去に投稿したものと重複するかの確認
+                    print(item_id[i].get('id'))
                     item_dict = {item_id[i].get('id'):[shop_name[i].get_text(),item_name[i].find('a').text,item_url[i].get('href')]}
                     self.scheduled_posts = item_dict | self.scheduled_posts  # 辞書の結合
                     
