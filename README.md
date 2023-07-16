@@ -6,25 +6,33 @@
 
 ## 直近のメモ
 - GCP以降失敗により直近のコミット（GCP移行のため、GCP用に24時間のプログラムから特定時間に実行させる形式へ変更）の内容は一時的に凍結
-- https://booth.pm/ja/browse/3D%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC?page={page_no} のurlで6ページ目までのアバター名のDBを作成
 - misskeyにおいて通報者（:emergency:）を送られた数が5以上の場合は通知を送付、10以上も何かしら検討
-- 一時的に削除DBに送ることも検討
-- DBの構成は現時点では3枚構成
-  - 投稿管理DB（直近5000件くらい?）
-    - DBの内容は商品id, 商品名, ショップ名, カテゴリー番号, misskeyでの投稿時刻
-  - 削除記録DB（ブラックリストも兼ねる予定）
-    - misskeyに投稿されて通報されたものを管理する
-    - 投稿管理DBの内容に通報数を合わせたデータを格納
-    - ショップ名で弾く方向性でブラックリストとして運用予定
-  - 既存3Dモデル商品名管理DB
-    - data-product-category="208"が3Dモデルのようなのでそれを参照し照合するシステムの検討 
- 
+- 画像をmd5のハッシュ値で管理及び照合を行い, 違法商品の判別を行う
+- サイトのレスポンスヘッダーのみを一度取得し, 更新日時を確認, 
+スクレイピングの有無を決めるシステムを実装することでboothの負荷を下げるシステムの開発（最優先）
+- 投稿用のAPIと情報取得用のAPIを統合する方向で調整を行うこと
+> ### 以下のメモ書きは次回コミットで削除, 以降DBに関してはDBINFO.mdへ移管
+>- https://booth.pm/ja/browse/3D%E3%82%AD%E3%83%A3%E3%83%A9%E3%82%AF%E3%82%BF%E3%83%BC?page={page_no} のurlで6ページ目までのアバター名のDBを作成
+>- 一時的に削除DBに送ることも検討
+>- DBの構成は現時点では3枚構成　
+>   - 投稿管理DB
+>     - DBの内容は商品id, 商品名, ショップ名, カテゴリー番号, misskeyでの投稿時刻
+>   - 削除記録DB（ブラックリストも兼ねる予定）
+>     - misskeyに投稿されて通報されたものを管理する
+>     - 投稿管理DBの内容に通報数を合わせたデータを格納
+>     - ショップ名で弾く方向性でブラックリストとして運用予定
+>   - 既存3Dモデル商品名管理DB
+>     - data-product-category="208"が3Dモデルのようなのでそれを参照し照合するシステムの検討 
+
+
+
 
 ## 以後以下のものの実装を検討
 - 冗長コードの削除
 - boothでの大まかな取得時間のデータ蓄積を行うシステムの開発
 - 違法商品を弾く仕組みの開発
-- CSV以外での投稿した商品の商品番号管理（mysql等）　やるなら上と一緒に実装。
+- CSV以外での投稿した商品の商品番号管理（mysql等）　やるなら上と一緒に実装
+- DBにアクセスをかけ内容を表示, 分析できるシステムの開発
 
 ## 期待値が低いが実装を検討
 - 再度GCPまたはHeroku等のクラウドサービスでの実行
@@ -33,13 +41,14 @@
 - GUIでの遠隔操作の手法（tkinter）　複雑なうえ同期関係、バグ等で開発難航。そもそも使う意味が学習のためだったため、理由を失い廃止。
 - GUIでの遠隔操作の手法（flask）　これによりsecure.pyは廃止の方向性で検討。
 
-### apikey.pyの内容
-
-#misskey instance
-misskey_instance = "MISSKEYINSTANCE"
-
-#api token
-misskey_api_token = "APIKEY"  #発信Botが投稿する際に使用するAPIKEY
-analysis_api_token = "APIKEY" #発信Botが投稿した情報を取得できるか検証する際に使用していたAPIKEY
-
-secure_api_token = "APIKEY"   #もともとsecure.pyに使用していたアカウントのAPIKEY ※1つだけ別のアカウント
+## apikey.pyの内容
+apikey.py
+>
+>#misskey instance
+>misskey_instance = "MISSKEYINSTANCE"
+>
+>#api token
+>misskey_api_token = "APIKEY"  #発信Botが投稿する際に使用するAPIKEY
+>analysis_api_token = "APIKEY" #発信Botが投稿した情報を取得できるか検証する際に使用していたAPIKEY
+>
+>secure_api_token = "APIKEY"   #もともとsecure.pyに使用していたアカウントのAPIKEY ※1つだけ別のアカウント
