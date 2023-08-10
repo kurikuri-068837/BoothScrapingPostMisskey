@@ -15,7 +15,7 @@ class PostNote():
             self.misskey_api.notes_create(text=f"{data[1]} - {data[0]}\n{data[2]}")
             self.logger.info(f"Note:{data[1]} - {data[0]}, {data[2]}")
             
-            time.sleep(10)
+            time.sleep(15)
         
 if __name__ == "__main__":
     pn = PostNote()
