@@ -23,7 +23,6 @@ class AppController():
         self.load_data()
         self.ProcessingFrag = True
         self.StoppableFrag = False
-        #TODO:ここにスクレイピング等の処理
         other_process_thread = threading.Thread(target=self.scraping_process)
         other_process_thread.start()
         
@@ -80,18 +79,17 @@ class AppController():
         while self.ProcessingFrag:
             self.StoppableFrag = False
             if self.check_process_time():
-                print("enter")
+                print("start scraping process")
                 scheduled_posts = self.sp.process()
                 
                 if scheduled_posts != {}:
-                    print("post process")
+                    print("start post process")
                     postnote_thread = threading.Thread(target=pn.post,args=(scheduled_posts,))
                     postnote_thread.start()
-                    print("post end")
+                    print("end posted process")
             
             
             self.StoppableFrag = True
-            
             for i in range(self.cycle_time):
                 if self.judge_weekday_daytime(): # 日中の昼間だった場合は実行スパンを30分おきにする
                     time.sleep(1*3)
@@ -102,50 +100,28 @@ class AppController():
                     print("a")
             postnote_thread.join()
         
-        
+    #曜日による処理の違いを実装するための処理
     def judge_weekday_daytime(self):
-        current_time = time.localtime()
-        day_of_week = current_time.tm_wday  # 0: 月曜日, 1: 火曜日, ... , 6: 日曜日
-        hour = current_time.tm_hour
-        minute = current_time.tm_min
-        
-        if 0 <= day_of_week <= 4:
+        self.get_hmm()
+        if 0 <= self.day_of_week <= 4:
             # 月曜日から金曜日までの場合
-            if (9 <= hour < 11) or (13 <= hour < 17) or (hour == 11 and minute <= 20 ):
+            if (9 <= self.hour < 11) or (13 <= self.hour < 17) or (self.hour == 11 and self.minute <= 20):
                 # 9時から12時、13時から17時までの間は日中のスパンを延長する
                 return True
         return False
         
-    # GCP移行に伴い使用中止
-    def CUI_Controller(self):
-        while True:
-            command = input("process - start/stop: ")
-            if command == "stop":
-                self.ProcessingFrag = False
-                self.stop_processing()
-                break
-            # 特定のコマンドに対する処理を記述する
-            if command == "start":
-                # 別のプロセスを実行
-                self.start_processing()
-            else:
-                print("無効なコマンドです。")
-                
-        input("プログラムを終了します。(please Enter)")
 
-
+    #曜日による処理の違いを実装するための処理
     def check_process_time(self):
-        current_time = time.localtime()
-        hour = current_time.tm_hour
-        minute = current_time.tm_min
-        
-        if 23 <= hour or 0 <= hour < 6 or (hour == 6 and minute <= 30 ) or (hour==22 and minute >=30):
-            
+        self.get_hmm()
+        if 23 <= self.hour or 0 <= self.hour < 6 or (self.hour == 6 and self.minute <= 30 ) or (self.hour==22 and self.minute >=30):
             print("夜間のため、プロセスを実行しません(停止時間:22時半~6時半まで)")
             self.save_data()
             sys.exit()
         return True
-
     
-    
-    
+    def get_hmm(self):
+        current_time = time.gmtime()
+        self.day_of_week = current_time.tm_wday  # 0: 月曜日, 1: 火曜日, ... , 6: 日曜日
+        self.hour = (current_time.tm_hour + 9) % 24 #GMTから日本時刻への変換（これでサーバー時刻による処理時間のずれを修正）
+        self.minute = current_time.tm_min

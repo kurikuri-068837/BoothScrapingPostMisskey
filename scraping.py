@@ -18,10 +18,9 @@ class Scraping():
         
         
     def add_processed_item_list(self,target_list,item):
-        #print(type(target_list))
         target_list.insert(0,item)  # 要素をリストに追加
         
-        if len(target_list) > 270:
+        if len(target_list) > 900:
             target_list.pop()
         return target_list
     
@@ -50,7 +49,6 @@ class Scraping():
             item_id,shop_name,item_name,item_url = self.get_info()
             #print(item_id)
             for i in range(60):
-                #print(item_id[i].get('id'))
                 if not item_id[i].get('id') in self.processed_id_list: # 過去に投稿したものと重複するかの確認
                     print(item_id[i].get('id'))
                     item_dict = {item_id[i].get('id'):[shop_name[i].get_text(),item_name[i].find('a').text,item_url[i].get('href')]}
@@ -66,13 +64,9 @@ class Scraping():
                 else:
                     self.NotReadNextPageFrag = True
                     break
-            if self.page_no == 4 : break # 3ページ目よりも後ろは見ないようにする（負荷軽減と万が一の時の保険）
+            if self.page_no == 10 : break # 10ページ目よりも後ろは見ないようにする（負荷軽減と万が一の時の保険）
             
-            
-            
-            
-            
-            time.sleep(3)
+            time.sleep(5) #負荷軽減のためアクセスサイクルを5秒に変更
             self.page_no+=1
         self.update_save_data()
         time.sleep(10)
@@ -88,9 +82,10 @@ class Scraping():
         return self.processed_id_list
     
     def update_save_data(self):
-        processed_id_list = self.processed_id_list
-        processed_id_list_df = pd.DataFrame(processed_id_list)
+        processed_id_list_df = pd.DataFrame(self.processed_id_list)
         processed_id_list_df.to_csv("processed_id_list.csv",index=False)
+        
+        
         
         
         
@@ -99,8 +94,8 @@ if __name__ == "__main__":
     processed_id_list = list(df.values[:,0])
     
     def check_process_time():
-        current_time = time.localtime()
-        hour = current_time.tm_hour
+        current_time = time.gmtime()
+        hour = (current_time.tm_hour + 9) % 24 #GMTから日本時刻への変換（これでサーバー時刻による処理時間のずれを修正）
         minute = current_time.tm_min
 
         if 23 <= hour or 0 <= hour < 6 or (hour == 6 and minute <= 30 ):
