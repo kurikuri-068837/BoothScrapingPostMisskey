@@ -29,7 +29,7 @@
 テーブル名 : booth_item_info         
 | カラム名     | データ型  | 最大文字数      | Null     | 特記事項    | 説明 |
 |:---         | :---:    | :---:          | :---:    | :---:       | ---: |
-| item_id     | INT      | 11             | NOT NULL | PRIMARY KEY | 商品id |
+| item_id     | VARCHAR  | 13             | NOT NULL | PRIMARY KEY | 商品id |
 | item_name   | VARCHAR  | 150            | NOT NULL |             | 商品名 |
 | shop_name   | VARCHAR  | 100            | NOT NULL |             | ショップ名 |
 | category_no | INT      | 11             | NOT NULL |             | カテゴリNo 数字3桁 |
@@ -40,7 +40,7 @@
 テーブル名 : misskey_post
 | カラム名     | データ型  | 最大文字数     | Null     | 特記事項     | 説明 |
 |:---         | :---:    | :---:         | :---:    | :---:        | ---: |
-| item_id     | INT      | 11            | NOT NULL | PRIMARY KEY1 | 商品id |
+| item_id     | VARCHAR  | 13            | NOT NULL | PRIMARY KEY1 | 商品id |
 | note_id     | INT      | 11            | NOT NULL | PRIMARY KEY2 |ノートid|
 | poted_at    | DATETIME |               | NOT NULL |              |投稿時間|
 | deleted_flag| TINYINT  |               | NOT NULL | 0/1          |削除フラグ|
@@ -54,11 +54,11 @@
 テーブル名 : white_list
 | カラム名     | データ型  | 最大文字数  | Null     | 特記事項    | 説明 |
 |:---         | :---:    | :---:      | :---:    | :---:       | ---: |
-| item_id     | INT      | 11         | NOT NULL | PRIMARY KEY | 商品id |
+| item_id     | VARCHAR  | 13         | NOT NULL | PRIMARY KEY | 商品id |
 
 
 テーブル名 : gray_list
 | カラム名     | データ型  | 最大文字数  | Null     | 特記事項    | 説明 |
 |:---         | :---:    | :---:      | :---:    | :---:       | ---: |
-| item_id     | INT      | 11         | NOT NULL | PRIMARY KEY | 商品id |
+| item_id     | VARCHAR  | 13         | NOT NULL | PRIMARY KEY | 商品id |
 
