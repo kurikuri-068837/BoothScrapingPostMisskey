@@ -27,7 +27,7 @@ class Scraping():
     
     def get_info(self):
         time.sleep(3)
-        cookie = {'adult': 't'}
+        cookie = {'adult': 't'} #年齢確認用のcookie確認
         r = rq.get(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat", cookies=cookie)
         print(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat")
         self.now_url_and_status_code = f"status:{r.status_code}  https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat"

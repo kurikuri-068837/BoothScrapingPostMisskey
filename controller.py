@@ -26,9 +26,6 @@ class AppController():
         other_process_thread = threading.Thread(target=self.scraping_process)
         other_process_thread.start()
         
-        
-        
-        
     
     def stop_processing(self):
         self.ProcessingFrag = False
@@ -86,7 +83,7 @@ class AppController():
                     print("start post process")
                     postnote_thread = threading.Thread(target=pn.post,args=(scheduled_posts,))
                     postnote_thread.start()
-                    print("end posted process")
+            
             
             
             self.StoppableFrag = True
@@ -97,8 +94,9 @@ class AppController():
                     time.sleep(1)
                 if not self.ProcessingFrag:
                     postnote_thread.join()
-                    print("a")
+                    print("Change ProcessingFrag")
             postnote_thread.join()
+            print("end posted process")
         
     #曜日による処理の違いを実装するための処理
     def judge_weekday_daytime(self):
@@ -117,7 +115,8 @@ class AppController():
         if 23 <= self.hour or 0 <= self.hour < 6 or (self.hour == 6 and self.minute <= 30 ) or (self.hour==22 and self.minute >=30):
             print("夜間のため、プロセスを実行しません(停止時間:22時半~6時半まで)")
             self.save_data()
-            sys.exit()
+            #sys.exit()
+            return False
         return True
     
     def get_hmm(self):
