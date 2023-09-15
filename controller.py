@@ -93,9 +93,12 @@ class AppController():
                 else:
                     time.sleep(1)
                 if not self.ProcessingFrag:
-                    postnote_thread.join()
-                    print("Change ProcessingFrag")
-            postnote_thread.join()
+                    if scheduled_posts != {}:
+                        postnote_thread.join()
+                        print("Change ProcessingFrag")
+            
+            if scheduled_posts != {}:
+                postnote_thread.join()
             print("end posted process")
         
     #曜日による処理の違いを実装するための処理
