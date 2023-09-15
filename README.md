@@ -13,6 +13,18 @@
 スクレイピングの有無を決めるシステムを実装することでboothの負荷を下げるシステムの開発（最優先）
 - 投稿用のAPIと情報取得用のAPIを統合する方向で調整を行うこと
 - コード検証用のファイルを作成. misskeyAPIの使いそうなコードが説明とともに記載されているため必要があれば参照すること
+- エラー原因 定義する前にpostnote_threadを呼んでしまうことがある 以下エラーコード
+  > Exception in thread Thread-1:
+  > Traceback (most recent call last):
+  >   File "C:\Users\username\Anaconda3\lib\threading.py", line 980, in _bootstrap_inner
+  >     self.run()
+  >   File "C:\Users\username\Anaconda3\lib\threading.py", line 917, in run
+  >     self._target(*self._args, **self._kwargs)
+  >   File "d:\programs\python\boothscraping_misskey\controller.py", line 98, in scraping_process
+  >     postnote_thread.join()
+  > UnboundLocalError: local variable 'postnote_thread' referenced before assignment
+- エラー原因 その2
+  ノートパソコンが自動的にwifiの方に接続してしまい接続不能になっていたが、そもそも有線lanの接続が切れてしまう原因が不明のためいったん保留
 
 
 ## 以後以下のものの実装を検討
