@@ -4,11 +4,10 @@ import time
 import pandas as pd
 import threading
 from misskey_post_note import PostNote
-import logging
 
 class Scraping():
     def __init__(self,processed_id_list:list):
-        self.logger = logging.getLogger("BSMPPLog.controller").getChild("model_scraping")
+        
         self.processed_id_list = processed_id_list
         self.item_dict_mem = {}
         self.NotReadNextPageFrag = False
@@ -31,7 +30,6 @@ class Scraping():
         r = rq.get(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat", cookies=cookie)
         print(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat")
         self.now_url_and_status_code = f"status:{r.status_code}  https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat"
-        self.logger.debug(f"{self.now_url_and_status_code}")
         soup = bs(r.content, "html.parser")
 
         item_id = soup.select('.item-card__wrap')
@@ -58,7 +56,6 @@ class Scraping():
                     
                     
                 elif item_id[i].get('id') in self.processed_id_list and self.page_no == 1 and i == 0:
-                    self.logger.info('NothingPostTarget')
                     self.NotReadNextPageFrag = True
                     break
                 else:

@@ -3,20 +3,14 @@ from misskey_post_note import PostNote
 import threading
 import time
 import pandas as pd
-import logging
 #from secure import * #GCP以降に伴い使用中止
-import sys
 
 class AppController():
     
     def __init__(self) -> None:
-        self.logger = logging.getLogger("BSMPPLog").getChild("controller")
         self.ProcessingFrag = False
         self.StoppableFrag = False
         self.cycle_time = 600
-        
-        
-        
         
         
     def start_processing(self):
@@ -38,32 +32,12 @@ class AppController():
         self.save_data()
         print("save ok")       
     
-    def pause_processing(self):
-        self.ProcessingFrag = False
-        
-        #TODO:スクレイピング、misskeyのポストの中断処理
-        pass
-    
-    def resume_processing(self,):
-        self.ProcessingFrag = True
-        self.StoppableFrag = False
-        self.scraping_process()
-        pass
-    
-    def normarmination_processing(self):
-        
-        
-        print("Close GUI")
-        
-        pass
-    
     def load_data(self):
         try:
             self.processed_id_list = list(pd.read_csv("processed_id_list.csv").values[:,0])
                 
         except:
             self.processed_id_list = []
-        logging.log
             
     def save_data(self):
         processed_id_list = self.sp.get_processed_id_list()
