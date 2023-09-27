@@ -2,17 +2,15 @@ import requests as rq
 from bs4 import BeautifulSoup as bs
 import time
 import pandas as pd
-import threading
-from misskey_post_note import PostNote
 
 class Scraping():
     def __init__(self,processed_id_list:list):
-        
+        self.booth_scraping_limit = 4 # スクレピングするページ数上限を指定（負荷軽減と万が一の時の保険）
         self.processed_id_list = processed_id_list
         self.item_dict_mem = {}
         self.NotReadNextPageFrag = False
         self.page_no = 1
-        self.updatecsv = threading.Thread(target=self.update_save_data)
+        
         
         
         
@@ -25,12 +23,10 @@ class Scraping():
     
     
     def get_info(self):
-        time.sleep(3)
         cookie = {'adult': 't'} #年齢確認用のcookie確認
         r = rq.get(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat", cookies=cookie)
         self.now_url_and_status_code = f"status:{r.status_code}  https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat"
         soup = bs(r.content, "html.parser")
-
         item_info = soup.select('div.u-mt-400> ul > li')
         shop_name = soup.select(".item-card__shop-name")
         item_name = soup.select(".item-card__title")
@@ -60,19 +56,12 @@ class Scraping():
                 else:
                     self.NotReadNextPageFrag = True
                     break
-            if self.page_no == 10 : break # 10ページ目よりも後ろは見ないようにする（負荷軽減と万が一の時の保険）
+            if self.page_no == self.booth_scraping_limit : break  # スクレピングするページ数を制限（負荷軽減と万が一の時の保険）
             
-            time.sleep(5) #負荷軽減のためアクセスサイクルを5秒に
+            time.sleep(5) # アクセスサイクル:5秒
             self.page_no+=1
-        self.update_save_data()
-        time.sleep(10)
-        
-        print("save ok")
         return self.scheduled_posts
-            
-            
-    def watch_now_processing_url(self):
-        return self.now_url_and_status_code
+    
     
     def get_processed_id_list(self):
         return self.processed_id_list
@@ -80,11 +69,10 @@ class Scraping():
     def update_save_data(self):
         processed_id_list_df = pd.DataFrame(self.processed_id_list)
         processed_id_list_df.to_csv("processed_id_list.csv",index=False)
+        print("save ok")
         
         
-        
-        
-        
+
 if __name__ == "__main__":
     sp = Scraping(list(pd.read_csv("processed_id_list.csv").values[:,0]))
     a,b,c,d = sp.get_info()

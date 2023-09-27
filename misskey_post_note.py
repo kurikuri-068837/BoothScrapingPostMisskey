@@ -12,6 +12,7 @@ class PostNote():
     def post(self,post_schedule):
         
         for data in post_schedule.values():
+            print(f"{data[1]} - {data[0]}\n{data[2]}")
             #self.misskey_api.notes_create(text=f"{data[1]} - {data[0]}\n{data[2]}")
             #TODO 改修中につき事故防止のコメントアウト 本番環境テストの際は使用
             time.sleep(15)
