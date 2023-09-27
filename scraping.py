@@ -2,6 +2,7 @@ import requests as rq
 from bs4 import BeautifulSoup as bs
 import time
 import pandas as pd
+import json
 
 class Scraping():
     def __init__(self,processed_id_list:list):
@@ -15,7 +16,6 @@ class Scraping():
     def get_info(self):
         cookie = {'adult': 't'} #年齢確認用のcookie確認
         r = rq.get(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat", cookies=cookie)
-        self.now_url_and_status_code = f"status:{r.status_code}  https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat"
         soup = bs(r.content, "html.parser")
         item_info = soup.select('div.u-mt-400> ul > li')
         shop_name = soup.select(".item-card__shop-name")
@@ -63,17 +63,30 @@ class Scraping():
         processed_id_list_df = pd.DataFrame(self.processed_id_list)
         processed_id_list_df.to_csv("processed_id_list.csv",index=False)
         print("save ok")
-
-
+        
+    def get_item_tags(self,item_url):
+        item_tags = []
+        r = rq.get(item_url+".json")
+        print(type(r))
+        data = r.json()
+        for d in data['tag_banners']:
+            item_tags.append(d["name"])
+        return item_tags
 
 if __name__ == "__main__":
     sp = Scraping(list(pd.read_csv("processed_id_list.csv").values[:,0]))
-    a,b,c,d = sp.get_info()
-    print(a[0].get('data-product-id')) # アイテムid
-    print(a[0].get('data-product-category')) # カテゴリid（3桁）
+    #a,b,c,d = sp.get_info()
+    #print(a[0].get('data-product-id')) # アイテムid
+    #print(a[0].get('data-product-category')) # カテゴリid（3桁）
+    sp.get_item_tags(item_url="https://booth.pm/ja/items/5126644")
 
 
-
+def get_item_tags(self,item_url):
+    r = rq.get(item_url)
+    soup = bs(r.content, "html.parser")
+    file = open('preview.html', 'w', encoding='utf-8')
+    file.write(str(soup))
+    file.close()
 
 
 
