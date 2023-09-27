@@ -12,16 +12,6 @@ class Scraping():
         self.page_no = 1
         
         
-        
-        
-    def add_processed_item_list(self,target_list,item):
-        target_list.insert(0,item)  # 要素をリストに追加
-        
-        if len(target_list) > 900:
-            target_list.pop()
-        return target_list
-    
-    
     def get_info(self):
         cookie = {'adult': 't'} #年齢確認用のcookie確認
         r = rq.get(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat", cookies=cookie)
@@ -41,7 +31,7 @@ class Scraping():
             
             item_info,shop_name,item_name,item_url = self.get_info()
             #print(item_id)
-            for i in range(60):
+            for i in range(60): # 1ページ当たり60商品のため
                 if not item_info[i].get('data-product-id') in self.processed_id_list: # 過去に投稿したものと重複するかの確認
                     print(item_info[i].get('data-product-id'))
                     item_dict = {item_info[i].get('data-product-id'):[shop_name[i].get_text(),item_name[i].find('a').text,item_url[i].get('href')]}
@@ -61,23 +51,26 @@ class Scraping():
             time.sleep(5) # アクセスサイクル:5秒
             self.page_no+=1
         return self.scheduled_posts
-    
-    
-    def get_processed_id_list(self):
-        return self.processed_id_list
-    
+
+        
+    def add_processed_item_list(self,target_list,item):
+        target_list.insert(0,item)  # 要素をリストに追加
+        if len(target_list) > 900:
+            target_list.pop()
+        return target_list
+
     def update_save_data(self):
         processed_id_list_df = pd.DataFrame(self.processed_id_list)
         processed_id_list_df.to_csv("processed_id_list.csv",index=False)
         print("save ok")
-        
-        
+
+
 
 if __name__ == "__main__":
     sp = Scraping(list(pd.read_csv("processed_id_list.csv").values[:,0]))
     a,b,c,d = sp.get_info()
-    print(a[0].get('data-product-id'))
-
+    print(a[0].get('data-product-id')) # アイテムid
+    print(a[0].get('data-product-category')) # カテゴリid（3桁）
 
 
 
