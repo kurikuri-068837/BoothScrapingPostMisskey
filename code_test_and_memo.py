@@ -16,12 +16,18 @@ print(a['createdNote']['id'])           #これでidの取得が可能
 print(a['createdNote']['createdAt'])    #これで投稿時間の取得が可能(フォーマット　ISO 8601 形式[yyyy-MM-ddTHH:mm:ss])
 
 
-b = misskey_api.notes_delete(note_id="9hbz4dyuu8") #ここにnote_idを指定するとプログラムから削除することができる
-misskey_api.notes_create(text=f"{b}",visibility="specified") #消した場合の返り値はTrue
+# b = misskey_api.notes_delete(note_id="9hbz4dyuu8") #ここにnote_idを指定するとプログラムから削除することができる
+# misskey_api.notes_create(text=f"{b}",visibility="specified") #消した場合の返り値はTrue
 #そのidのノートがない場合以下のエラーが出るため例外処理を一応組み込んでおくこと
 ### エラー内容 ###
 
 # misskey.exceptions.MisskeyAPIException: NO_SUCH_NOTE(490be23f-8c1f-4796-819f-94cb4f9d1630): No such note.
+
+new_note = misskey_api.users_notes(user_id="9f7qzlsum9")
+print(new_note[0]['id'])                                 # この2行でそのアカウントの最新の投稿情報が取得できる
+
+show_note = misskey_api.notes_show(note_id=new_note[0]['id'])
+print(show_note['text'])
 
 #################
 
