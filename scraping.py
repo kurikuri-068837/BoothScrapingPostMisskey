@@ -79,14 +79,3 @@ if __name__ == "__main__":
     #print(a[0].get('data-product-id')) # アイテムid
     #print(a[0].get('data-product-category')) # カテゴリid（3桁）
     sp.get_item_tags(item_url="https://booth.pm/ja/items/5126644")
-
-
-def get_item_tags(self,item_url):
-    r = rq.get(item_url)
-    soup = bs(r.content, "html.parser")
-    file = open('preview.html', 'w', encoding='utf-8')
-    file.write(str(soup))
-    file.close()
-
-
-
