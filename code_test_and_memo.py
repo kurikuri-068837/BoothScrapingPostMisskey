@@ -2,6 +2,7 @@ import uuid
 from misskey import Misskey as mk
 from apikey import *
 from datetime import datetime
+import time
 
 
 Password = "testtest"
@@ -9,6 +10,9 @@ Password = "testtest"
 SecuretyID = uuid.uuid4()
 misskey_api = mk(misskey_instance)
 misskey_api.token = secure_api_token
+
+misskey_main = mk(misskey_instance)
+misskey_main.token = misskey_api_token #実環境のためむやみに使用しないこと
 
 a =  misskey_api.notes_create(text=f"{Password}c\n{SecuretyID}",visibility="specified")
 # visibility="specified"は自分自身に投稿し、他の人には見えないようにするための物なので注意すること
@@ -27,7 +31,12 @@ new_note = misskey_api.users_notes(user_id="9f7qzlsum9")
 print(new_note[0]['id'])                                 # この2行でそのアカウントの最新の投稿情報が取得できる
 
 show_note = misskey_api.notes_show(note_id=new_note[0]['id'])
-print(show_note['text'])
+print(show_note['text'])                                 # 最新投稿の内容取得
+
+time.sleep(2)
+
+user_analysys = misskey_main.i()
+print(user_analysys)
 
 #################
 
