@@ -74,8 +74,28 @@ class Scraping():
         return item_tags
 
 if __name__ == "__main__":
-    sp = Scraping(list(pd.read_csv("processed_id_list.csv").values[:,0]))
-    #a,b,c,d = sp.get_info()
-    #print(a[0].get('data-product-id')) # アイテムid
-    #print(a[0].get('data-product-category')) # カテゴリid（3桁）
-    sp.get_item_tags(item_url="https://booth.pm/ja/items/5126644")
+    # プロセス済みアイテムリストの初期化
+    processed_id_list = []
+    
+    # Scrapingクラスのインスタンスを作成
+    sp = Scraping(processed_id_list)
+    
+    # プロセスメソッドを実行し、スケジュールされた投稿を取得
+    scheduled_posts = sp.process()
+    
+    # 取得したスケジュールされた投稿を表示
+    print("Scheduled Posts:")
+    for item_id, item_info in scheduled_posts.items():
+        print(f"Item ID: {item_id}")
+        print(f"Shop Name: {item_info[0]}")
+        print(f"Item Name: {item_info[1]}")
+        print(f"Item URL: {item_info[2]}")
+    
+    # プロセス済みアイテムリストを更新
+    sp.update_save_data()
+    
+    # アイテムのタグを取得
+    item_tags = sp.get_item_tags(item_url="https://booth.pm/ja/items/5126644")
+    print("Item Tags:")
+    for tag in item_tags:
+        print(tag)
