@@ -3,6 +3,8 @@ data.json
 .vscode/
 **.pyc
 **.csv
-!processed_id_list.csv
+!category_list.csv
 **.txt
 **.log
+**.a5er
+**.doc
