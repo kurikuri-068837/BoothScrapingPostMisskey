@@ -7,6 +7,7 @@
   - 削除フラグも管理
 - poplar_model_shop
   - white_listに入っているショップがアバターを出品した際の検知に使用
+> white_list, gray_listはコピー商品の検証方法が未定のため凍結
 - white_list
   - 違法商品検出のため有名アバターの情報の商品idを格納
 - gray_list
@@ -32,8 +33,7 @@
 | item_id     | VARCHAR  | 13             | NOT NULL | PRIMARY KEY | 商品id |
 | item_name   | VARCHAR  | 150            | NOT NULL |             | 商品名 |
 | shop_name   | VARCHAR  | 100            | NOT NULL |             | ショップ名 |
-| category_no | INT      | 11             | NOT NULL |             | カテゴリNo 数字3桁 |
-| img_md5     | CHAR     | 128            | NOT NULL |             | 画像ハッシュ値 128bit |
+| category_no | INT      | 11             | IS  NULL |             | カテゴリNo 数字3桁 |
 | corrent_at  | DATETIME |                | NOT NULL | corrent_timestamp| 追加日時 |
 
 
@@ -44,6 +44,15 @@
 | note_id     | INT      | 11            | NOT NULL | PRIMARY KEY2 |ノートid|
 | poted_at    | DATETIME |               | NOT NULL |              |投稿時間|
 | deleted_flag| TINYINT  |               | NOT NULL | 0/1          |削除フラグ|
+
+
+テーブル名 : category       
+| カラム名     | データ型  | 最大文字数      | Null     | 特記事項    | 説明 |
+|:---         | :---:    | :---:          | :---:    | :---:       | ---: |
+| category_no | INT      | 11             | NOT NULL |             | カテゴリNo 数字3桁 |
+| category_name | VARCHAR| 13             | NOT NULL |             | カテゴリ名（日本語）|
+
+### 以下設定に関して保留（画像のハッシュの取得を行おうとした場合負荷がかかることになるため）
 
 テーブル名 : poplar_model_shop
 | カラム名     | データ型  | 最大文字数  | Null     | 特記事項     | 説明 |
