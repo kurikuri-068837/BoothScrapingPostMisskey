@@ -34,7 +34,7 @@
 | item_name   | VARCHAR  | 150            | NOT NULL |             | 商品名 |
 | shop_name   | VARCHAR  | 100            | NOT NULL |             | ショップ名 |
 | category_no | INT      | 11             | IS  NULL |             | カテゴリNo 数字3桁 |
-| corrent_at  | DATETIME |                | NOT NULL | corrent_timestamp| 追加日時 |
+| current_at  | DATETIME |                | NOT NULL | corrent_timestamp| 追加日時 |
 
 
 テーブル名 : misskey_post
