@@ -25,7 +25,7 @@ def setting_log():
 
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     logger = setting_log()
     logger.debug("StartProcess")
     app = AppController()
