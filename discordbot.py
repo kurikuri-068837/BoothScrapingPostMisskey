@@ -1,11 +1,14 @@
 import discord
 from discord import app_commands
+import os
+from dotenv import load_dotenv
 
 """
 discordbot初期設定
 """
-#bot Token
-TOKEN="entry your Token"
+#bot Tokenを環境ファイルから読み込み
+load_dotenv()
+TOKEN=os.environ["TOKEN"]
 
 #channelid
 channelid="entry channelid"
