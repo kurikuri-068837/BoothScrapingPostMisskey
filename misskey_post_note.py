@@ -12,7 +12,7 @@ class PostNote():
     def post(self,post_schedule):
         self.logger.debug("CallPostProcess")
         for data in post_schedule.values():
-            self.misskey_api.notes_create(text=f"{data[1]} - {data[0]}\n{data[2]}")
+            self.misskey_api.notes_create(text=f"{data[1]} - {data[0]}\n?[{data[2]}]({data[2]})")
             self.logger.info(f"Note:{data[1]} - {data[0]}, {data[2]}")
             
             time.sleep(15)
