@@ -16,6 +16,8 @@ def setting_log():
     # handlerの生成
     stream_handler = logging.StreamHandler()
     
+    
+
     # ログ出力フォーマット設定
     handler_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     stream_handler.setFormatter(handler_format)

@@ -28,11 +28,12 @@ class Scraping():
     def get_info(self):
         time.sleep(3)
         cookie = {'adult': 't'} #年齢確認用のcookie確認
-        r = rq.get(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat", cookies=cookie)
-        print(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat")
-        self.now_url_and_status_code = f"status:{r.status_code}  https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat"
-        self.logger.debug(f"{self.now_url_and_status_code}")
-        soup = bs(r.content, "html.parser")
+        
+        with rq.get(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat", cookies=cookie) as r:
+            print(f"https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat")
+            self.now_url_and_status_code = f"status:{r.status_code}  https://booth.pm/ja/items?adult=include&page={self.page_no}&sort=new&tags%5B%5D=VRChat"
+            self.logger.debug(f"{self.now_url_and_status_code}")
+            soup = bs(r.content, "html.parser")
 
         item_id = soup.select('.item-card__wrap')
         shop_name = soup.select(".item-card__shop-name")
@@ -119,7 +120,7 @@ if __name__ == "__main__":
                 postnote_thread = threading.Thread(target=pn.post,args=(scheduled_posts,))
                 postnote_thread.start()
                 print("post end")
-        time.sleep(600)
+        time.sleep(1200)
 
 
 
